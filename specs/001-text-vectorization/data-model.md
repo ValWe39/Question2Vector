@@ -35,7 +35,7 @@ Un texte à vectoriser, détecté depuis les arguments CLI.
 Résultat du parsing d'argparse, validé avant tout appel API (FR-011).
 
 | Champ | Type | Bornes | Défaut |
-|-------|------|--------|--------|
+| ------- | ------ | -------- | -------- |
 | `embed_model` | `1024` \| `256` \| `128` | — | `1024` |
 | `batch_size` | int | 0-100 | 25 |
 | `reformule` | bool | — | false |
@@ -53,7 +53,7 @@ sortie d'erreur de configuration.
 Table de correspondance stricte (FR-009, doc Mistral) :
 
 | Alias | Nom API | Dimension | Nature |
-|-------|---------|-----------|--------|
+| ------- | --------- | ----------- | -------- |
 | `1024` | `mistral-embed` | 1024 | float32 |
 | `256` | `mistral-embed-dim256-2510` | 256 | float32 |
 | `128` | `mistral-embed-dim128-2510` | 128 | float32 |
@@ -64,7 +64,7 @@ et les champs `dimension_vecteur`/`nature_vecteur` de la sortie.
 ### LlmModelRef (référentiel LLM)
 
 | Alias | Nom API |
-|-------|---------|
+| ------- | --------- |
 | `large4` | `mistral-large-4` |
 | `large` | `mistral-large-latest` |
 | `medium` | `mistral-medium-latest` |

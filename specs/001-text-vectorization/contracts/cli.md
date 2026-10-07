@@ -29,7 +29,7 @@ le nombre d'éléments traités découle des arguments, sans option dédiée.
 ## Options
 
 | Option | Valeurs | Bornes | Défaut |
-|--------|---------|--------|--------|
+| -------- | --------- | -------- | -------- |
 | `--choix-techno-embed` | `1024` \| `256` \| `128` | — | `1024` |
 | `--taille-batch` | entier | 0-100 (0 = pas de batch) | `25` |
 | `--reformule` | `on` \| `no` | — | `no` |
