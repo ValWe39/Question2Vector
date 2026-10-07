@@ -1,0 +1,5 @@
+{
+  // Respecte le .gitignore du dépôt : les dossiers ignorés
+  // (Ressources/, Examples/, Prompts/, etc.) ne sont pas lintés.
+  "gitignore": true
+}
