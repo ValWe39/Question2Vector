@@ -20,6 +20,25 @@ MISTRAL_API_KEY=YOUR_API_KEY
 
 Le fichier `.env` est exclu de git (cf. `.gitignore`).
 
+Sur Windows (PowerShell), le venv n'est pas toujours active : dans ce cas,
+appelez directement l'executable du venv, sans activation :
+
+```text
+.venv\Scripts\vector "de quelle couleur est le cheval blanc d'heri IV ?"
+```
+
+Pour activer le venv, si la strategie d'execution de PowerShell bloque
+`Activate.ps1`, autorisez les scripts pour la fenetre en cours puis
+activez :
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.venv\Scripts\activate
+```
+
+Apres activation, le prompt affiche un prefixe `(...)` et la commande
+`vector` seule suffit ; `deactivate` pour sortir.
+
 ## Usage
 
 ```bash
