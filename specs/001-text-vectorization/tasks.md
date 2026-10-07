@@ -33,15 +33,15 @@ implémentation et une validation indépendantes.
 
 **Purpose**: initialisation du projet Python
 
-- [ ] T001 Créer `pyproject.toml` : dépendances `mistralai`,
+- [X] T001 Créer `pyproject.toml` : dépendances `mistralai`,
   `python-dotenv` ; dev `pytest` ; entry point console
   `vector = question2vector.cli:main` ; config Ruff alignée sur le CI
-- [ ] T002 [P] Créer le squelette `src/question2vector/__init__.py` et
+- [X] T002 [P] Créer le squelette `src/question2vector/__init__.py` et
   `src/question2vector/__main__.py` (invocation
   `python -m question2vector`)
-- [ ] T003 [P] Créer `.env.example` avec le placeholder
+- [X] T003 [P] Créer `.env.example` avec le placeholder
   `MISTRAL_API_KEY=YOUR_API_KEY` (jamais de clé réelle — constitution I)
-- [ ] T004 [P] Créer `tests/unit/` et `tests/integration/` avec un
+- [X] T004 [P] Créer `tests/unit/` et `tests/integration/` avec un
   `conftest.py` racine (fixtures communes, aucun réseau)
 
 ---
@@ -53,7 +53,7 @@ implémentation et une validation indépendantes.
 **CRITICAL**: aucune user story ne peut commencer avant la fin de cette
 phase
 
-- [ ] T005 Implémenter `src/question2vector/config.py` :
+- [X] T005 Implémenter `src/question2vector/config.py` :
   `VectorizationOptions` + validation des bornes — citer verbatim :
   `--taille-batch` (0-100, défaut 25), `--retry-occurences` (0-10,
   défaut 3), `--retry-time` (1-10 s, défaut 3), `--temperature-llm`
@@ -61,20 +61,20 @@ phase
   1024), `--choix-modele-llm` (8 alias, défaut `small`), `--reformule`
   (on/no, défaut no), `--output-folder` (défaut `output/`) ; valeur
   hors bornes → erreur claire avant tout appel API
-- [ ] T006 Implémenter `src/question2vector/config.py` : chargement de
+- [X] T006 Implémenter `src/question2vector/config.py` : chargement de
   `MISTRAL_API_KEY` via `python-dotenv` + échec rapide si absente
   (FR-017) ; la clé n'est jamais affichée ni journalisée (FR-016)
-- [ ] T007 Implémenter `src/question2vector/mistral_client.py` :
+- [X] T007 Implémenter `src/question2vector/mistral_client.py` :
   enveloppe fine injectable du SDK — `embedder(model, texts)` renvoyant
   `list[list[float]]`, `discuter(model, prompt, temperature)` renvoyant
   la réponse LLM ; aucune logique métier dans cette couche
-- [ ] T008 Implémenter `src/question2vector/embedding.py` : tables de
+- [X] T008 Implémenter `src/question2vector/embedding.py` : tables de
   référence strictes (FR-009, FR-010) — `mistral-embed`/1024,
   `mistral-embed-dim256-2510`/256, `mistral-embed-dim128-2510`/128,
   nature `float32` ; LlmModelRef des 8 alias (data-model.md) ;
   fonction de retry à délai exponentiel (délai initial doublé à chaque
   essai, cf. FR-015)
-- [ ] T009 Implémenter `src/question2vector/cli.py` : argparse complet
+- [X] T009 Implémenter `src/question2vector/cli.py` : argparse complet
   des 8 options du contrat `contracts/cli.md` + codes de sortie
   (`0` succès, `1` configuration, `2` échecs d'éléments) ; appel de
   `config.py` pour la validation avant tout appel réseau
@@ -96,33 +96,33 @@ avec un vecteur de 1024 floats (quickstart.md, scénario 2)
 > **NOTE**: écrire ces tests AVANT l'implémentation, s'assurer qu'ils
 > échouent d'abord
 
-- [ ] T010 [P] [US-1] Tests unitaires de détection d'entrée dans
+- [X] T010 [P] [US-1] Tests unitaires de détection d'entrée dans
   `tests/unit/test_inputs.py` : fichier existant `.txt`/`.md`, chaîne
   sans syntaxe de chemin, chemin inexistant → erreur (FR-001) ;
   fichier vide → non traitable
-- [ ] T011 [P] [US-1] Tests unitaires de nommage dans
+- [X] T011 [P] [US-1] Tests unitaires de nommage dans
   `tests/unit/test_output.py` : 7 premiers caractères significatifs,
   symboles ignorés, accents simplifiés, espaces en `_`, repli
   `sans_titre`, conflit `-1`, `-2`… (FR-007, FR-008)
 
 ### Implementation for User Story 1
 
-- [ ] T012 [US-1] Implémenter `src/question2vector/inputs.py` : règle
+- [X] T012 [US-1] Implémenter `src/question2vector/inputs.py` : règle
   de détection FR-001 (fichier existant / chaîne littérale sans
   syntaxe de chemin / chemin inexistant → erreur) + lecture UTF-8
   du contenu complet (FR-002)
-- [ ] T013 [US-1] Implémenter `src/question2vector/output.py` : dérivation
+- [X] T013 [US-1] Implémenter `src/question2vector/output.py` : dérivation
   du nom de sortie (FR-007) et gestion des conflits `-X` (FR-008),
   intra-exécution incluse
-- [ ] T014 [US-1] Implémenter `src/question2vector/output.py` :
+- [X] T014 [US-1] Implémenter `src/question2vector/output.py` :
   sérialisation `OutputRecord` schéma `Vector-1.0` —
   `schema_version`/`entrée`/`reformulation`/`vecteur`/
   `dimension_vecteur`/`nature_vecteur` (FR-005) ; invariant
   `len(vecteur) == dimension_vecteur` sinon échec de l'élément
-- [ ] T015 [US-1] Câbler `src/question2vector/cli.py` : flux unitaire
+- [X] T015 [US-1] Câbler `src/question2vector/cli.py` : flux unitaire
   (détection → embedding sans batch → écriture JSON) avec le
   `EmbeddingModelRef` par défaut 1024
-- [ ] T016 [US-1] Test d'intégration dans
+- [X] T016 [US-1] Test d'intégration dans
   `tests/integration/test_single.py` : client mocké, chaîne unique
   puis `.txt` puis `.md`, vérification du JSON complet et du code de
   sortie 0
@@ -141,25 +141,25 @@ regroupés (quickstart.md, scénario 3)
 
 ### Tests for User Story 2
 
-- [ ] T017 [P] [US-2] Tests unitaires dans `tests/unit/test_batching.py`
+- [X] T017 [P] [US-2] Tests unitaires dans `tests/unit/test_batching.py`
   : découpage en lots de 25 (ex. 40 éléments → 2 lots 25+15), taille 0
   → requête simple par texte (FR-004)
 
 ### Implementation for User Story 2
 
-- [ ] T018 [US-2] Implémenter l'expansion de dossier dans
+- [X] T018 [US-2] Implémenter l'expansion de dossier dans
   `src/question2vector/inputs.py` : premier niveau uniquement, seuls
   `.txt`/`.md` retenus, autres formats ignorés silencieusement (FR-002)
   ; dossier sans fichier éligible → erreur claire
-- [ ] T019 [US-2] Implémenter le regroupement par batch dans
+- [X] T019 [US-2] Implémenter le regroupement par batch dans
   `src/question2vector/embedding.py` : découpage en lots de
   `--taille-batch` et redistribution des vecteurs aux éléments ;
   `--taille-batch 0` = une requête par texte, sans lot
-- [ ] T020 [US-2] Implémenter le bilan d'exécution
+- [X] T020 [US-2] Implémenter le bilan d'exécution
   (`ProcessingReport`) dans `src/question2vector/cli.py` : statut par
   élément, échecs signalés à la fin sans interrompre les autres
   (FR-003, FR-014), code de sortie `2` si au moins un échec
-- [ ] T021 [US-2] Test d'intégration dans
+- [X] T021 [US-2] Test d'intégration dans
   `tests/integration/test_multi.py` : dossier temporaire de fichiers
   mixtes, client mocké, un JSON par élément éligible dans le même
   dossier de sortie
@@ -179,7 +179,7 @@ scénario 4)
 
 ### Tests for User Story 3
 
-- [ ] T022 [P] [US-3] Tests unitaires dans
+- [X] T022 [P] [US-3] Tests unitaires dans
   `tests/unit/test_reformulation.py` : éligibilité ≤ 500 caractères
   (FR-012), parsing strict du schéma
   `ambiguous`/`reformulation`/`options`, `ambiguous: true` ou JSON
@@ -187,17 +187,17 @@ scénario 4)
 
 ### Implementation for User Story 3
 
-- [ ] T023 [US-3] Implémenter `src/question2vector/reformulation.py` :
+- [X] T023 [US-3] Implémenter `src/question2vector/reformulation.py` :
   prompt de reformulation constant (spec.md, sans modification, texte
   inséré en fin), appel LLM en JSON mode
   (`response_format` `{"type": "json_object"}`, research.md point 6),
   parsing strict, éligibilité ≤ 500 caractères — documents longs
   vectorisés tels quels
-- [ ] T024 [US-3] Câbler `src/question2vector/cli.py` : si reformulation
+- [X] T024 [US-3] Câbler `src/question2vector/cli.py` : si reformulation
   réussie, le vecteur porte sur la reformulation et `reformulation`
   est rempli dans le JSON ; l'original reste dans `entrée` (FR-013) ;
   appel élément par élément, jamais par lot (FR-004)
-- [ ] T025 [US-3] Test d'intégration dans
+- [X] T025 [US-3] Test d'intégration dans
   `tests/integration/test_reformulation.py` : cas nominal, cas ambigu
   (aucun JSON produit, code 2), cas document long (pas d'appel LLM)
 
@@ -216,7 +216,7 @@ scénario 4)
 
 ### Tests for User Story 4
 
-- [ ] T026 [P] [US-4] Tests unitaires de bornes dans
+- [X] T026 [P] [US-4] Tests unitaires de bornes dans
   `tests/unit/test_config.py` : matrice hors bornes (`--taille-batch
   150`, `--retry-time 0`, `--retry-occurences 11`,
   `--temperature-llm 1,5`, alias inconnu) → refus avant tout appel API
@@ -224,20 +224,20 @@ scénario 4)
 
 ### Implementation for User Story 4
 
-- [ ] T027 [US-4] Vérifier le choix du modèle bout-en-bout dans
+- [X] T027 [US-4] Vérifier le choix du modèle bout-en-bout dans
   `src/question2vector/cli.py` + `embedding.py` : `256` et `128`
   produisent des vecteurs de la bonne dimension avec les champs
   `dimension_vecteur`/`nature_vecteur` correspondants (FR-009)
-- [ ] T028 [US-4] Vérifier la nature `float32` sur une réponse API
+- [X] T028 [US-4] Vérifier la nature `float32` sur une réponse API
   réelle (research.md point 9) : une requête manuelle, ajuster la
   table `EmbeddingModelRef` si contredit ; consigner le résultat dans
   `specs/001-text-vectorization/research.md`
-- [ ] T029 [US-4] Vérifier le plumbing des options de contrôle dans
+- [X] T029 [US-4] Vérifier le plumbing des options de contrôle dans
   `src/question2vector/cli.py` : `--taille-batch 0`, `--retry-time` /
   `--retry-occurences` (délais 1 s puis 2 s pour `--retry-time 1
   --retry-occurences 2`), `--output-folder` (dossier créé si absent),
   `--temperature-llm` transmise au LLM
-- [ ] T030 [US-4] Test d'intégration dans
+- [X] T030 [US-4] Test d'intégration dans
   `tests/integration/test_options.py` : 256 dimensions, lot 0, dossier
   de sortie personnalisé, valeurs hors bornes → code `1` avant appel
 
@@ -249,15 +249,15 @@ scénario 4)
 
 **Purpose**: préoccupations transversales aux stories
 
-- [ ] T031 [P] Vérifier les licences et l'absence de trackers des
+- [X] T031 [P] Vérifier les licences et l'absence de trackers des
   dépendances (`pip-audit`, job `audit` du CI — constitution III) ;
   consigner dans `specs/001-text-vectorization/research.md`
-- [ ] T032 Exécuter la validation complète de
+- [X] T032 Exécuter la validation complète de
   `specs/001-text-vectorization/quickstart.md` (scénarios 1 à 7) et
   corriger les écarts constatés
-- [ ] T033 [P] Mettre à jour `README.md` : installation, usage du
+- [X] T033 [P] Mettre à jour `README.md` : installation, usage du
   contrat `contracts/cli.md`, référence au quickstart
-- [ ] T034 Nettoyage final : `pytest` vert, `ruff check` et
+- [X] T034 Nettoyage final : `pytest` vert, `ruff check` et
   `markdownlint-cli2` verts (hooks pre-commit), aucun secret ni chemin
   personnel dans le diff (constitution I)
 

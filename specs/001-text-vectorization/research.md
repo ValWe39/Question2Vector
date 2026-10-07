@@ -130,9 +130,21 @@ pre-commit), examen du dépôt.
   l'implémentation HTTP du SDK ; `pytest-mock` — sucre syntaxique non
   indispensable.
 
+## Verifications d'implementation (2026-10-07)
+
+Les deux points différés en tâche sont résolus :
+
+- **Licences des dépendances** (T031) : `mistralai` Apache-2.0,
+  `python-dotenv` BSD-3-Clause, `pytest` MIT (dev) ; transitives
+  permissives (pydantic MIT, anyio MIT, h11 MIT, idna BSD,
+  packaging Apache-2.0/BSD, colorama BSD). Seul écart au « préféré » :
+  `certifi` en MPL-2.0, open-source acceptable. Aucun tracker ni
+  télémétrie détecté dans les paquets installés.
+- **Nature des vecteurs** (T028) : une requête réelle sur
+  `mistral-embed` confirme 1024 dimensions et des valeurs dyadiques à
+  7-8 chiffres significatifs, typiques de la précision float32 ; la
+  table `EmbeddingModelRef` est confirmée telle quelle.
+
 ## Inconnues résiduelles
 
-Aucune balise NEEDS CLARIFICATION ne subsiste du contexte technique. Les
-deux points de vérification différés en tâche d'implémentation :
-licences exactes des dépendances (job `audit` existant) et nature float32
-des vecteurs (une requête réelle).
+Aucune balise NEEDS CLARIFICATION ne subsiste.

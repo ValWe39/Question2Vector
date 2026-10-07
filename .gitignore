@@ -17,3 +17,17 @@ Ressources/
 !.specify/memory/
 !.specify/assessments/
 !.specify/bugs/
+
+# Environnement Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+dist/
+build/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# Exception : le template de configuration reste versionne
+!.env.example
