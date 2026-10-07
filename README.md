@@ -56,10 +56,25 @@ schema_version, entree, reformulation, vecteur,
 dimension_vecteur, nature_vecteur
 ```
 
-Options principales : `--choix-techno-embed` (1024, 256 ou 128
-dimensions, defaut 1024), `--taille-batch` (0 a 100, defaut 25),
-`--choix-modele-llm`, `--retry-occurences`, `--retry-time`,
-`--temperature-llm`, `--output-folder`.
+| Option | Valeurs | Bornes | Defaut |
+| ------ | ------- | ------ | ------ |
+| `--choix-techno-embed` | `1024`, `256`, `128` | - | `1024` |
+| `--taille-batch` | entier | 0 a 100 | `25` |
+| `--reformule` | `on`, `no` | - | `no` |
+| `--choix-modele-llm` | alias LLM (liste ci-dessous) | - | `small` |
+| `--retry-occurences` | entier | 0 a 10 | `3` |
+| `--retry-time` | entier (secondes) | 1 a 10 | `3` |
+| `--temperature-llm` | decimal | 0 a 1 | `0,2` |
+| `--output-folder` | chemin | - | `output/` |
+
+Alias LLM valides : `large4` (mistral-large-4), `large`
+(mistral-large-latest), `medium` (mistral-medium-latest), `small`
+(mistral-small-latest, defaut), `14b` (ministral-14b-latest), `8b`
+(ministral-8b-latest), `3b` (ministral-3b-latest), `zai` (zai-glm-5-3).
+
+`--taille-batch 0` desactive le regroupement en lots : une requete
+d'embedding par texte. La reference complete est dans
+[contracts/cli.md](specs/001-text-vectorization/contracts/cli.md).
 
 La reference complete est dans
 [contracts/cli.md](specs/001-text-vectorization/contracts/cli.md).
