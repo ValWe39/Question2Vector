@@ -24,6 +24,7 @@ def options_valides(**surcharges) -> dict:
         "retry_time": "3",
         "output_folder": "sortie_test",
         "temperature_llm": "0.2",
+        "ungroup": "no",
     }
     valeurs.update(surcharges)
     return valeurs
@@ -40,6 +41,17 @@ def test_valeurs_par_defaut_valides():
     assert resultat.retry_time == 3
     assert resultat.output_folder == Path("sortie_test")
     assert resultat.temperature_llm == pytest.approx(0.2)
+    assert resultat.ungroup is False
+
+
+def test_ungroup_on_active_le_mode_degroupe():
+    resultat = construire_options(**options_valides(ungroup="on"))
+    assert resultat.ungroup is True
+
+
+def test_ungroup_valeur_inconnue_refusee():
+    with pytest.raises(ErreurConfiguration, match="ungroup"):
+        construire_options(**options_valides(ungroup="peut-etre"))
 
 
 @pytest.mark.parametrize(

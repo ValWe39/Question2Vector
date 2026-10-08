@@ -32,7 +32,7 @@ structure reutilisee telle quelle).
 
 **Purpose**: partir d'une base saine avant toute modification
 
-- [ ] T001 Verifier que la suite actuelle passe :
+- [x] T001 Verifier que la suite actuelle passe :
   `.venv/Scripts/python -m pytest` vert sur l'etat de la branche
 
 ---
@@ -41,12 +41,12 @@ structure reutilisee telle quelle).
 
 **Purpose**: structures que toutes les stories partagent
 
-- [ ] T002 [P] Ajouter l'option `--ungroup` (`on` | `no`, defaut
+- [x] T002 [P] Ajouter l'option `--ungroup` (`on` | `no`, defaut
   `no`) au parseur de src/question2vector/cli.py et le champ
   `ungroup` a `VectorizationOptions` dans
   src/question2vector/config.py ; toute autre valeur refusee avec
   `ErreurConfiguration` (data-model.md, ModeLivraison)
-- [ ] T003 [P] Dans src/question2vector/output.py : faire passer
+- [x] T003 [P] Dans src/question2vector/output.py : faire passer
   `SCHEMA_VERSION` a `"Vector-2.0"` et ajouter
   `EnregistrementEchec` — champs exacts `schema_version`,
   `entree`, `motif_echec` non vide, jamais de champ `vecteur`
@@ -70,20 +70,20 @@ et 2).
 
 ### Tests for User Story 1 (a reorienter en premier)
 
-- [ ] T004 [P] [US-1] Reorienter tests/unit/test_output.py :
+- [x] T004 [P] [US-1] Reorienter tests/unit/test_output.py :
   format tableau (liste, jamais un objet isole), ordre des
   enregistrements, nommage `sortie.json` et suffixe `-X`
-- [ ] T005 [P] [US-1] Reorienter tests/integration/test_single.py :
+- [x] T005 [P] [US-1] Reorienter tests/integration/test_single.py :
   entree unique → tableau a exactement un enregistrement a 6
   champs dans `sortie.json`
 
 ### Implementation for User Story 1
 
-- [ ] T006 [US-1] Implementer l'ecriture du livrable dans
+- [x] T006 [US-1] Implementer l'ecriture du livrable dans
   src/question2vector/output.py : liste ordonnee d'enregistrements
   serialisee en tableau JSON, nommage `sortie.json` avec suffixe
   d'unicite via `resoudre_nom` (FR-006, FR-010)
-- [ ] T007 [US-1] Restructurer `executer` dans
+- [x] T007 [US-1] Restructurer `executer` dans
   src/question2vector/cli.py : collecter les enregistrements
   reussis dans l'ordre des entrees, ecrire le livrable unique en fin
   de run, adapter `RapportElement` et `_afficher_bilan` au fichier
@@ -104,16 +104,16 @@ selon le contrat 001 (quickstart scenario 3).
 
 ### Tests for User Story 2
 
-- [ ] T008 [P] [US-2] Ajouter le scenario degroupe dans
+- [x] T008 [P] [US-2] Ajouter le scenario degroupe dans
   tests/integration/test_multi.py : N entrees → N fichiers, chacun
   un tableau a un enregistrement, nommage `deriver_titre` + suffixe
-- [ ] T009 [P] [US-2] Ajouter la validation de `--ungroup` dans
+- [x] T009 [P] [US-2] Ajouter la validation de `--ungroup` dans
   tests/unit/test_config.py : `on`/`no` acceptes, valeur invalide
   refusee avant tout appel API
 
 ### Implementation for User Story 2
 
-- [ ] T010 [US-2] Brancher le mode degroupe dans
+- [x] T010 [US-2] Brancher le mode degroupe dans
   src/question2vector/cli.py : un fichier par entree (tableau a un
   enregistrement), nommage selon le contrat 001 ; le comportement
   regroupe reste le defaut
@@ -136,22 +136,22 @@ code 2, puis relancer et verifier le suffixe sans ecrasement
 
 ### Tests for User Story 3
 
-- [ ] T011 [P] [US-3] Scenario echec partiel dans
+- [x] T011 [P] [US-3] Scenario echec partiel dans
   tests/integration/test_multi.py : 2 reussites a vecteur + 1
   enregistrement d'echec (`entree` = argument brut,
   `motif_echec` = « chemin introuvable »), code de sortie 2
-- [ ] T012 [P] [US-3] Scenario reexecution dans
+- [x] T012 [P] [US-3] Scenario reexecution dans
   tests/integration/test_multi.py : nouveau run dans le meme
   dossier → `sortie-1.json`, `sortie.json` inchange
 
 ### Implementation for User Story 3
 
-- [ ] T013 [US-3] Injecter les enregistrements d'echec dans
+- [x] T013 [US-3] Injecter les enregistrements d'echec dans
   src/question2vector/cli.py : echecs de detection de
   `resoudre_arguments` (motif standardise « chemin introuvable »),
   echecs de reformulation et d'embedding, en preservant l'ordre des
   arguments d'appel (FR-005, FR-007)
-- [ ] T014 [US-3] Verifier l'absence d'ecrasement pour le livrable
+- [x] T014 [US-3] Verifier l'absence d'ecrasement pour le livrable
   unique dans src/question2vector/output.py : suffixe d'unicite
   systematique via `resoudre_nom`, y compris toutes entrees en echec
   (cas limite data-model.md)
@@ -165,13 +165,13 @@ code 2, puis relancer et verifier le suffixe sans ecrasement
 **Purpose**: coherence des documents de reference et validation
 finale
 
-- [ ] T015 [P] Mettre a jour README.md : format de sortie tableau
+- [x] T015 [P] Mettre a jour README.md : format de sortie tableau
   `Vector-2.0`, option `--ungroup` dans le tableau des options,
   lien vers specs/002-sortie-tableau-json/contracts/cli.md
 - [ ] T016 Executer le guide
   specs/002-sortie-tableau-json/quickstart.md en entier et verifier
   chaque attendu (scenarios 1 a 6)
-- [ ] T017 Lancer `.venv/Scripts/python -m pytest` complet et
+- [x] T017 Lancer `.venv/Scripts/python -m pytest` complet et
   `pre-commit run --all-files` avant cloture
 
 ---

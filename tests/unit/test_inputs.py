@@ -99,7 +99,9 @@ def test_dossier_fichier_vide_signale_sans_arret(tmp_path: Path):
     entrees, echecs = resoudre_arguments([str(tmp_path)])
     assert [e.titre_source for e in entrees] == ["Bon"]
     assert len(echecs) == 1
-    assert "Vide.txt" in echecs[0]
+    identifiant, motif = echecs[0]
+    assert "Vide.txt" in identifiant
+    assert "vide" in motif
 
 
 def test_resoudre_arguments_agrege_les_echecs(tmp_path: Path):
@@ -110,4 +112,6 @@ def test_resoudre_arguments_agrege_les_echecs(tmp_path: Path):
     )
     assert len(entrees) == 2
     assert len(echecs) == 1
-    assert "introuvable" in echecs[0]
+    identifiant, motif = echecs[0]
+    assert identifiant == "chemin/inconnu.txt"
+    assert "introuvable" in motif

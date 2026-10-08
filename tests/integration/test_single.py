@@ -1,4 +1,5 @@
-"""Tests d'integration du flux unitaire (US-1, quickstart scenario 1 et 2)."""
+"""Tests d'integration du flux unitaire (US-1, quickstart scenarios
+1, 2 et 6)."""
 
 from __future__ import annotations
 
@@ -7,12 +8,28 @@ import json
 from question2vector.cli import main
 from tests.conftest import usine
 
+CHAMPS_REUSSITE = {
+    "schema_version",
+    "entrée",
+    "reformulation",
+    "vecteur",
+    "dimension_vecteur",
+    "nature_vecteur",
+}
+
 
 def invoquer(client, *arguments):
     return main(list(arguments), usine_client=usine(client))
 
 
-def test_chaine_unique_produit_un_json_valide(tmp_path, fabrique_client, cle_test):
+def charger_livrable(chemin):
+    """Charge le tableau JSON produit et verifie le format (FR-001)."""
+    charge = json.loads(chemin.read_text(encoding="utf-8"))
+    assert isinstance(charge, list)
+    return charge
+
+
+def test_chaine_unique_produit_tableau_un_element(tmp_path, fabrique_client, cle_test):
     client = fabrique_client()
     sortie = tmp_path / "sortie"
     code = invoquer(
@@ -23,20 +40,21 @@ def test_chaine_unique_produit_un_json_valide(tmp_path, fabrique_client, cle_tes
     )
     assert code == 0
     fichiers = list(sortie.glob("*.json"))
-    assert [f.name for f in fichiers] == ["Comment.json"]
-    charge = json.loads(fichiers[0].read_text(encoding="utf-8"))
-    assert charge["schema_version"] == "Vector-1.0"
-    assert charge["entrée"] == "Comment fonctionne le depot git ?"
-    assert charge["reformulation"] == ""
-    assert len(charge["vecteur"]) == 1024
-    assert charge["dimension_vecteur"] == 1024
-    assert charge["nature_vecteur"] == "float32"
+    assert [f.name for f in fichiers] == ["sortie.json"]
+    (element,) = charger_livrable(sortie / "sortie.json")
+    assert element["schema_version"] == "Vector-2.0"
+    assert element["entrée"] == "Comment fonctionne le depot git ?"
+    assert element["reformulation"] == ""
+    assert len(element["vecteur"]) == 1024
+    assert element["dimension_vecteur"] == 1024
+    assert element["nature_vecteur"] == "float32"
+    assert element.keys() == CHAMPS_REUSSITE
     [(nom_modele, textes)] = client.appels_embedding
     assert nom_modele == "mistral-embed"
     assert textes == ["Comment fonctionne le depot git ?"]
 
 
-def test_fichiers_txt_et_md(tmp_path, fabrique_client, cle_test):
+def test_fichiers_txt_et_md_regroupes(tmp_path, fabrique_client, cle_test):
     fichier_txt = tmp_path / "Corsen.txt"
     fichier_txt.write_text("contenu txt", encoding="utf-8")
     fichier_md = tmp_path / "Tocqueville2.md"
@@ -51,10 +69,12 @@ def test_fichiers_txt_et_md(tmp_path, fabrique_client, cle_test):
         str(sortie),
     )
     assert code == 0
-    noms = sorted(f.name for f in sortie.glob("*.json"))
-    assert noms == ["Corsen.json", "Tocquev.json"]
-    charge = json.loads((sortie / "Corsen.json").read_text(encoding="utf-8"))
-    assert charge["entrée"] == "contenu txt"
+    assert [f.name for f in sortie.glob("*.json")] == ["sortie.json"]
+    charge = charger_livrable(sortie / "sortie.json")
+    assert [element["entrée"] for element in charge] == [
+        "contenu txt",
+        "contenu md",
+    ]
 
 
 def test_reexecution_suffixe_le_conflit(tmp_path, fabrique_client, cle_test):
@@ -64,7 +84,7 @@ def test_reexecution_suffixe_le_conflit(tmp_path, fabrique_client, cle_test):
     assert invoquer(client, *arguments) == 0
     assert invoquer(client, *arguments) == 0
     noms = sorted(f.name for f in sortie.glob("*.json"))
-    assert noms == ["une_que-1.json", "une_que.json"]
+    assert noms == ["sortie-1.json", "sortie.json"]
 
 
 def test_aucune_entree_exploitable_sort_1(tmp_path, fabrique_client, cle_test):
@@ -78,7 +98,7 @@ def test_aucune_entree_exploitable_sort_1(tmp_path, fabrique_client, cle_test):
     assert code == 1
 
 
-def test_echec_partiel_sort_2_et_ecrit_les_valides(tmp_path, fabrique_client, cle_test):
+def test_echec_partiel_livrable_exhaustif(tmp_path, fabrique_client, cle_test):
     sortie = tmp_path / "sortie"
     client = fabrique_client()
     code = invoquer(
@@ -89,7 +109,15 @@ def test_echec_partiel_sort_2_et_ecrit_les_valides(tmp_path, fabrique_client, cl
         str(sortie),
     )
     assert code == 2
-    assert [f.name for f in sortie.glob("*.json")] == ["questio.json"]
+    assert [f.name for f in sortie.glob("*.json")] == ["sortie.json"]
+    reussite, echec = charger_livrable(sortie / "sortie.json")
+    assert reussite["entrée"] == "question valide"
+    assert "vecteur" in reussite
+    assert echec == {
+        "schema_version": "Vector-2.0",
+        "entrée": "chemin/inexistant.txt",
+        "motif_echec": "chemin introuvable",
+    }
 
 
 def test_cle_absente_echoue_avant_tout_appel(tmp_path, fabrique_client, monkeypatch):

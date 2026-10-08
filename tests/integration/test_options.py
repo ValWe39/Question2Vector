@@ -24,9 +24,10 @@ def test_modele_256_dimensions(tmp_path, fabrique_client, cle_test):
         str(sortie),
     )
     assert code == 0
-    charge = json.loads((sortie / "questio.json").read_text(encoding="utf-8"))
-    assert charge["dimension_vecteur"] == 256
-    assert len(charge["vecteur"]) == 256
+    charge = json.loads((sortie / "sortie.json").read_text(encoding="utf-8"))
+    assert isinstance(charge, list) and len(charge) == 1
+    assert charge[0]["dimension_vecteur"] == 256
+    assert len(charge[0]["vecteur"]) == 256
     [(nom_modele, _)] = client.appels_embedding
     assert nom_modele == "mistral-embed-dim256-2510"
 
@@ -43,9 +44,10 @@ def test_modele_128_dimensions(tmp_path, fabrique_client, cle_test):
     )
     assert code == 0
     charge = json.loads(
-        (tmp_path / "sortie" / "questio.json").read_text(encoding="utf-8")
+        (tmp_path / "sortie" / "sortie.json").read_text(encoding="utf-8")
     )
-    assert charge["dimension_vecteur"] == 128
+    assert isinstance(charge, list) and len(charge) == 1
+    assert charge[0]["dimension_vecteur"] == 128
 
 
 def test_valeur_hors_bornes_refusee_avant_appel(tmp_path, fabrique_client, cle_test):
@@ -81,7 +83,7 @@ def test_dossier_de_sortie_personnalise_cree(tmp_path, fabrique_client, cle_test
     client = fabrique_client()
     code = invoquer(client, "question", "--output-folder", str(sortie))
     assert code == 0
-    assert (sortie / "questio.json").exists()
+    assert (sortie / "sortie.json").exists()
 
 
 def test_temperature_transmise_au_llm(tmp_path, fabrique_client, cle_test):
@@ -110,4 +112,9 @@ def test_dimension_inattendue_fait_echouer_l_element(
     client = fabrique_client(dimension=512)
     code = invoquer(client, "question", "--output-folder", str(tmp_path / "sortie"))
     assert code == 2
-    assert list((tmp_path / "sortie").glob("*.json")) == []
+    charge = json.loads(
+        (tmp_path / "sortie" / "sortie.json").read_text(encoding="utf-8")
+    )
+    (element,) = charge
+    assert "vecteur" not in element
+    assert "dimension" in element["motif_echec"]

@@ -1,4 +1,5 @@
-"""Tests unitaires de nommage et d'ecriture (US-1, FR-007, FR-008)."""
+"""Tests unitaires du schema Vector-2.0 et du nommage (US-1, FR-001,
+FR-002, FR-006, FR-007, FR-010)."""
 
 from __future__ import annotations
 
@@ -9,11 +10,21 @@ import pytest
 
 from question2vector.output import (
     SCHEMA_VERSION,
+    EnregistrementEchec,
     OutputRecord,
     deriver_titre,
-    ecrire_sortie,
+    ecrire_tableau,
     resoudre_nom,
 )
+
+CHAMPS_REUSSITE = {
+    "schema_version",
+    "entrée",
+    "reformulation",
+    "vecteur",
+    "dimension_vecteur",
+    "nature_vecteur",
+}
 
 
 def test_titre_chaine_longue_coupee_a_7():
@@ -31,7 +42,7 @@ def test_titre_accents_simplifies():
 
 def test_titre_symboles_ignores_repli_si_vide():
     assert deriver_titre("***") == "sans_titre"
-    assert deriver_titre("???") == "sans_titre"
+    assert deriver_titre("??") == "sans_titre"
 
 
 def test_titre_court_conserve():
@@ -41,45 +52,77 @@ def test_titre_court_conserve():
 
 def test_conflit_suffixe_numerique(tmp_path: Path):
     pris: set[str] = set()
-    premier = resoudre_nom("Corsen", tmp_path, pris)
-    assert premier.name == "Corsen.json"
-    deuxieme = resoudre_nom("Corsen", tmp_path, pris)
-    assert deuxieme.name == "Corsen-1.json"
-    troisieme = resoudre_nom("Corsen", tmp_path, pris)
-    assert troisieme.name == "Corsen-2.json"
+    premier = resoudre_nom("sortie", tmp_path, pris)
+    assert premier.name == "sortie.json"
+    deuxieme = resoudre_nom("sortie", tmp_path, pris)
+    assert deuxieme.name == "sortie-1.json"
+    troisieme = resoudre_nom("sortie", tmp_path, pris)
+    assert troisieme.name == "sortie-2.json"
 
 
 def test_conflit_avec_fichier_existant_sur_disque(tmp_path: Path):
-    (tmp_path / "Titre.json").write_text("{}", encoding="utf-8")
-    chemin = resoudre_nom("Titre", tmp_path, set())
-    assert chemin.name == "Titre-1.json"
+    (tmp_path / "sortie.json").write_text("[]", encoding="utf-8")
+    chemin = resoudre_nom("sortie", tmp_path, set())
+    assert chemin.name == "sortie-1.json"
 
 
-def test_ecriture_json_complet(tmp_path: Path):
-    record = OutputRecord(
-        entree="Le texte d'entrée.",
+def record_de_test(entree: str = "Le texte d'entrée.") -> OutputRecord:
+    return OutputRecord(
+        entree=entree,
         reformulation="",
         vecteur=[0.5, -0.25],
         dimension_vecteur=2,
         nature_vecteur="float32",
     )
+
+
+def test_ecriture_toujours_un_tableau(tmp_path: Path):
     chemin = tmp_path / "Sortie.json"
-    ecrire_sortie(record, chemin)
+    ecrire_tableau([record_de_test()], chemin)
     charge = json.loads(chemin.read_text(encoding="utf-8"))
-    assert charge["schema_version"] == SCHEMA_VERSION
-    assert charge["entrée"] == "Le texte d'entrée."
-    assert charge["reformulation"] == ""
-    assert charge["vecteur"] == [0.5, -0.25]
-    assert charge["dimension_vecteur"] == 2
-    assert charge["nature_vecteur"] == "float32"
-    assert charge.keys() == {
-        "schema_version",
-        "entrée",
-        "reformulation",
-        "vecteur",
-        "dimension_vecteur",
-        "nature_vecteur",
+    assert isinstance(charge, list)
+    assert len(charge) == 1
+    (element,) = charge
+    assert element["schema_version"] == SCHEMA_VERSION == "Vector-2.0"
+    assert element["entrée"] == "Le texte d'entrée."
+    assert element["reformulation"] == ""
+    assert element["vecteur"] == [0.5, -0.25]
+    assert element["dimension_vecteur"] == 2
+    assert element["nature_vecteur"] == "float32"
+    assert element.keys() == CHAMPS_REUSSITE
+
+
+def test_ecriture_tableau_conserve_l_ordre(tmp_path: Path):
+    chemin = tmp_path / "sortie.json"
+    ecrire_tableau(
+        [record_de_test("première question"), record_de_test("seconde")],
+        chemin,
+    )
+    charge = json.loads(chemin.read_text(encoding="utf-8"))
+    assert [element["entrée"] for element in charge] == [
+        "première question",
+        "seconde",
+    ]
+
+
+def test_enregistrement_echec_trois_champs_exactement(tmp_path: Path):
+    echec = EnregistrementEchec(
+        entree="chemin/inexistant.txt",
+        motif_echec="chemin introuvable",
+    )
+    chemin = tmp_path / "Echec.json"
+    ecrire_tableau([echec], chemin)
+    (element,) = json.loads(chemin.read_text(encoding="utf-8"))
+    assert element == {
+        "schema_version": "Vector-2.0",
+        "entrée": "chemin/inexistant.txt",
+        "motif_echec": "chemin introuvable",
     }
+
+
+def test_enregistrement_echec_motif_vide_refuse():
+    with pytest.raises(ValueError, match="motif"):
+        EnregistrementEchec(entree="texte", motif_echec="   ")
 
 
 def test_invariant_dimension_vecteur():

@@ -1,4 +1,4 @@
-"""Ligne de commande `vector` (contracts/cli.md)."""
+"""Ligne de commande `vector` (contracts/cli.md de la spec 002)."""
 
 from __future__ import annotations
 
@@ -19,12 +19,13 @@ from question2vector.embedding import (
     avec_retry,
     decouper_en_lots,
 )
-from question2vector.inputs import Entree, resoudre_arguments
+from question2vector.inputs import Entree, ErreurEntree, resoudre_argument
 from question2vector.mistral_client import ClientMistral
 from question2vector.output import (
+    EnregistrementEchec,
     OutputRecord,
     deriver_titre,
-    ecrire_sortie,
+    ecrire_tableau,
     resoudre_nom,
 )
 from question2vector.reformulation import (
@@ -42,6 +43,11 @@ class RapportElement:
     ok: bool
     fichier: str | None = None
     motif: str | None = None
+
+
+def _motif_court(message: str) -> str:
+    """Garde la cause d'un message d'erreur, sans le detail."""
+    return message.split(" : ", 1)[0]
 
 
 def construire_parseur() -> argparse.ArgumentParser:
@@ -99,48 +105,83 @@ def construire_parseur() -> argparse.ArgumentParser:
         default="0.2",
         help="temperature du LLM de reformulation, 0 a 1 (defaut : 0,2)",
     )
+    parseur.add_argument(
+        "--ungroup",
+        default="no",
+        help="une sortie par entree au lieu d'un livrable unique : "
+        "on ou no (defaut : no)",
+    )
     return parseur
+
+
+def _planifier(
+    arguments: list[str],
+) -> tuple[list[tuple[str, object]], list[Entree]]:
+    """Construit le plan ordonne du run (FR-005).
+
+    Chaque argument aboutit a une ou plusieurs entrees, ou a un
+    echec de detection, dans l'ordre des arguments d'appel. Le plan
+    est une liste de couples ("entree", index) et
+    ("echec", (identifiant, motif)).
+    """
+    plan: list[tuple[str, object]] = []
+    entrees: list[Entree] = []
+    for argument in arguments:
+        try:
+            sous_entrees, sous_echecs = resoudre_argument(argument)
+        except ErreurEntree as err:
+            plan.append(("echec", (argument, str(err))))
+            continue
+        for entree in sous_entrees:
+            plan.append(("entree", len(entrees)))
+            entrees.append(entree)
+        for identifiant, motif in sous_echecs:
+            plan.append(("echec", (identifiant, motif)))
+    return plan, entrees
 
 
 def executer(
     entrees: list[Entree],
     options: VectorizationOptions,
     client,
-) -> list[RapportElement]:
-    """Traite chaque element independamment (FR-003) et retourne le
-    bilan complet.
+) -> tuple[list[OutputRecord | EnregistrementEchec], list[RapportElement]]:
+    """Traite chaque entree et retourne les enregistrements alignes
+    sur `entrees`, plus le bilan aligne sur le meme ordre (FR-007).
 
-    Seule l'etape d'embedding est regroupee en lots (FR-004) ; la
-    reformulation reste element par element.
+    Seule l'etape d'embedding est regroupee en lots ; la
+    reformulation reste element par element. Une entree en echec
+    produit un EnregistrementEchec.
     """
     modele = EMBED_MODELS[options.embed_model]
-    rapports: list[RapportElement] = []
+    rapports: list[RapportElement | None] = [None] * len(entrees)
+    resultats: list[OutputRecord | EnregistrementEchec | None] = [None] * len(entrees)
 
     # Phase 1 : reformulation, element par element
-    a_vectoriser: list[tuple[Entree, str, str]] = []
-    for entree in entrees:
+    a_vectoriser: list[tuple[int, str, str]] = []
+    for i, entree in enumerate(entrees):
         if options.reformule and est_eligible(entree.texte):
             try:
                 reformulation = reformuler(client, entree.texte, options)
             except ErreurReformulation as err:
-                rapports.append(
-                    RapportElement(entree.titre_source, False, motif=str(err))
-                )
+                motif = str(err)
+                resultats[i] = EnregistrementEchec(entree.texte, motif)
+                rapports[i] = RapportElement(entree.titre_source, False, motif=motif)
                 continue
-            a_vectoriser.append((entree, reformulation, reformulation))
+            a_vectoriser.append((i, reformulation, reformulation))
         else:
-            a_vectoriser.append((entree, "", entree.texte))
+            a_vectoriser.append((i, "", entree.texte))
 
     # Phase 2 : embedding regroupe en lots, avec reprise par lot
     vecteurs: dict[int, list[float]] = {}
     echecs_lot: set[int] = set()
-    lots = decouper_en_lots(list(range(len(a_vectoriser))), options.batch_size)
+    texte_par_index = {i: texte for i, _, texte in a_vectoriser}
+    lots = decouper_en_lots(list(texte_par_index), options.batch_size)
     for lot in lots:
         indexes = lot
-        textes = [a_vectoriser[i][2] for i in indexes]
+        textes = [texte_par_index[i] for i in indexes]
         try:
             appel = partial(client.embedder, modele.nom_api, textes)
-            resultats = avec_retry(
+            vecteurs_lot = avec_retry(
                 appel,
                 options.retry_occurrences,
                 options.retry_time,
@@ -149,55 +190,51 @@ def executer(
             # poursuit les autres lots (cas limites de la spec)
             echecs_lot.update(indexes)
             for i in indexes:
-                rapports.append(
-                    RapportElement(
-                        a_vectoriser[i][0].titre_source,
-                        False,
-                        motif=f"echec d'embedding : {err}",
-                    )
+                motif = f"echec d'embedding : {err}"
+                resultats[i] = EnregistrementEchec(entrees[i].texte, motif)
+                rapports[i] = RapportElement(
+                    entrees[i].titre_source, False, motif=motif
                 )
             continue
-        for i, vecteur in zip(indexes, resultats, strict=True):
+        for i, vecteur in zip(indexes, vecteurs_lot, strict=True):
             vecteurs[i] = vecteur
 
-    # Phase 3 : ecriture, element par element
-    pris: set[str] = set()
-    for i, (entree, reformulation, _) in enumerate(a_vectoriser):
+    # Phase 3 : enregistrements, dans l'ordre des entrees
+    for i, reformulation, _ in a_vectoriser:
         if i in echecs_lot:
             continue
         vecteur = vecteurs.get(i)
         if vecteur is None:
-            rapports.append(
-                RapportElement(
-                    entree.titre_source,
-                    False,
-                    motif="vecteur manquant pour cet element",
-                )
-            )
+            motif = "vecteur manquant pour cet element"
+            resultats[i] = EnregistrementEchec(entrees[i].texte, motif)
+            rapports[i] = RapportElement(entrees[i].titre_source, False, motif=motif)
             continue
         try:
             record = OutputRecord(
-                entree=entree.texte,
+                entree=entrees[i].texte,
                 reformulation=reformulation,
                 vecteur=vecteur,
                 dimension_vecteur=modele.dimension,
                 nature_vecteur=modele.nature,
             )
-            titre = deriver_titre(entree.titre_source)
-            chemin = resoudre_nom(titre, options.output_folder, pris)
-            ecrire_sortie(record, chemin)
         except ValueError as err:
-            rapports.append(RapportElement(entree.titre_source, False, motif=str(err)))
+            motif = str(err)
+            resultats[i] = EnregistrementEchec(entrees[i].texte, motif)
+            rapports[i] = RapportElement(entrees[i].titre_source, False, motif=motif)
             continue
-        rapports.append(RapportElement(entree.titre_source, True, fichier=str(chemin)))
-    return rapports
+        resultats[i] = record
+        rapports[i] = RapportElement(entrees[i].titre_source, True)
+    assert all(r is not None for r in rapports)
+    assert all(res is not None for res in resultats)
+    return resultats, rapports  # type: ignore[return-value]
 
 
 def _afficher_bilan(
-    rapports: list[RapportElement], echecs_arguments: list[str]
+    rapports: list[RapportElement],
+    echecs_detection: list[tuple[str, str]],
 ) -> None:
-    for motif in echecs_arguments:
-        print(f"Echec d'entree : {motif}", file=sys.stderr)
+    for identifiant, motif in echecs_detection:
+        print(f"Echec d'entree : {identifiant} : {motif}", file=sys.stderr)
     for rapport in rapports:
         if rapport.ok:
             print(f"OK   {rapport.fichier}")
@@ -210,7 +247,7 @@ def _afficher_bilan(
     print(
         f"Bilan : {reussis} element(s) vectorise(s), "
         f"{len(rapports) - reussis} en echec, "
-        f"{len(echecs_arguments)} entree(s) non resolue(s)"
+        f"{len(echecs_detection)} entree(s) non resolue(s)"
     )
 
 
@@ -234,24 +271,58 @@ def main(
             retry_time=args.retry_time,
             output_folder=args.output_folder,
             temperature_llm=args.temperature_llm,
+            ungroup=args.ungroup,
         )
         cle_api = charger_cle_api()
     except ErreurConfiguration as err:
         print(f"Erreur de configuration : {err}", file=sys.stderr)
         return 1
 
-    entrees, echecs_arguments = resoudre_arguments(args.entrees)
+    plan, entrees = _planifier(args.entrees)
+    echecs_detection = [charge for genre, charge in plan if genre == "echec"]
     if not entrees:
-        for motif in echecs_arguments:
-            print(f"Echec d'entree : {motif}", file=sys.stderr)
+        for identifiant, motif in echecs_detection:
+            print(f"Echec d'entree : {identifiant} : {motif}", file=sys.stderr)
         print("Aucune entree exploitable.", file=sys.stderr)
         return 1
 
     client = (usine_client or ClientMistral)(cle_api)
-    rapports = executer(entrees, options, client)
-    _afficher_bilan(rapports, echecs_arguments)
+    resultats, rapports = executer(entrees, options, client)
 
-    if any(not r.ok for r in rapports) or echecs_arguments:
+    pris: set[str] = set()
+    if options.ungroup:
+        for genre, charge in plan:
+            if genre == "entree":
+                i = charge
+                record = resultats[i]
+                titre = deriver_titre(entrees[i].titre_source)
+            else:
+                identifiant, motif = charge
+                record = EnregistrementEchec(identifiant, _motif_court(motif))
+                titre = deriver_titre(identifiant)
+            chemin = resoudre_nom(titre, options.output_folder, pris)
+            ecrire_tableau([record], chemin)
+            if genre == "entree":
+                rapports[i].fichier = str(chemin)
+    else:
+        enregistrements: list[OutputRecord | EnregistrementEchec] = []
+        for genre, charge in plan:
+            if genre == "entree":
+                enregistrements.append(resultats[charge])
+            else:
+                identifiant, motif = charge
+                enregistrements.append(
+                    EnregistrementEchec(identifiant, _motif_court(motif))
+                )
+        chemin = resoudre_nom("sortie", options.output_folder, pris)
+        ecrire_tableau(enregistrements, chemin)
+        for rapport in rapports:
+            if rapport.ok:
+                rapport.fichier = str(chemin)
+
+    _afficher_bilan(rapports, echecs_detection)
+
+    if echecs_detection or any(not r.ok for r in rapports):
         return 2
     return 0
 
