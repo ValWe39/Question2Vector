@@ -27,6 +27,7 @@ class VectorizationOptions:
     retry_time: int
     output_folder: Path
     temperature_llm: float
+    ungroup: bool
 
 
 def _entier(nom: str, valeur: str, minimum: int, maximum: int) -> int:
@@ -63,6 +64,7 @@ def construire_options(
     retry_time: str,
     output_folder: str,
     temperature_llm: str,
+    ungroup: str,
 ) -> VectorizationOptions:
     """Valide toutes les bornes avant tout appel API (FR-011).
 
@@ -79,6 +81,10 @@ def construire_options(
         raise ErreurConfiguration(
             f"--reformule : {reformule!r} inconnu (valeurs admises : on, no)"
         )
+    if ungroup not in ("on", "no"):
+        raise ErreurConfiguration(
+            f"--ungroup : {ungroup!r} inconnu (valeurs admises : on, no)"
+        )
     if llm_model_alias not in LLM_MODELS:
         admis = ", ".join(LLM_MODELS)
         raise ErreurConfiguration(
@@ -94,6 +100,7 @@ def construire_options(
         retry_time=_entier("--retry-time", retry_time, 1, 10),
         output_folder=Path(output_folder),
         temperature_llm=_decimal("--temperature-llm", temperature_llm, 0.0, 1.0),
+        ungroup=(ungroup == "on"),
     )
 
 

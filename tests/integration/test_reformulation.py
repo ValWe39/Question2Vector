@@ -29,10 +29,11 @@ def test_question_courte_reformulee_puis_vectorisee(
         str(sortie),
     )
     assert code == 0
-    charge = json.loads((sortie / "Ca_marc.json").read_text(encoding="utf-8"))
-    assert charge["entrée"] == "Ca marche comment ?"
+    charge = json.loads((sortie / "sortie.json").read_text(encoding="utf-8"))
+    (element,) = charge
+    assert element["entrée"] == "Ca marche comment ?"
     assert (
-        charge["reformulation"] == "Comment fonctionne le deploiement du connecteur ?"
+        element["reformulation"] == "Comment fonctionne le deploiement du connecteur ?"
     )
     # le vecteur porte sur la reformulation, pas sur l'original
     [(_, textes)] = client.appels_embedding
@@ -54,7 +55,10 @@ def test_question_ambigue_echoue_sans_fichier(tmp_path, fabrique_client, cle_tes
         str(sortie),
     )
     assert code == 2
-    assert list(sortie.glob("*.json")) == []
+    charge = json.loads((sortie / "sortie.json").read_text(encoding="utf-8"))
+    (element,) = charge
+    assert "vecteur" not in element
+    assert element["motif_echec"]
     assert client.appels_embedding == []
 
 
@@ -75,9 +79,10 @@ def test_document_long_non_reformule(tmp_path, fabrique_client, cle_test):
     )
     assert code == 0
     assert client.appels_chat == []
-    charge = json.loads((sortie / "Cours.json").read_text(encoding="utf-8"))
-    assert charge["reformulation"] == ""
-    assert charge["entrée"] == long_texte
+    charge = json.loads((sortie / "sortie.json").read_text(encoding="utf-8"))
+    (element,) = charge
+    assert element["reformulation"] == ""
+    assert element["entrée"] == long_texte
     [(_, textes)] = client.appels_embedding
     assert textes == [long_texte]
 

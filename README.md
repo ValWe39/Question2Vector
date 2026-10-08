@@ -48,13 +48,28 @@ vector Examples/                               # dossier complet
 vector --reformule on "Ca marche comment ?"     # avec reformulation LLM
 ```
 
-Chaque element traite produit un JSON `Vector-1.0` dans `output/`
-(dossier configurable via `--output-folder`) :
+Par defaut, toutes les questions vectorisees du run sont regroupees
+dans un seul fichier `output/sortie.json` (dossier configurable via
+`--output-folder`) : un tableau JSON `Vector-2.0`, avec un
+enregistrement par entree, dans l'ordre des arguments.
 
 ```text
-schema_version, entree, reformulation, vecteur,
-dimension_vecteur, nature_vecteur
+[
+  {
+    "schema_version": "Vector-2.0",
+    "entree": ...,
+    "reformulation": ...,
+    "vecteur": [float, ...],
+    "dimension_vecteur": ...,
+    "nature_vecteur": "float32"
+  }
+]
 ```
+
+Une entree en echec produit un enregistrement reduit a trois champs
+(`schema_version`, `entree`, `motif_echec`), sans vecteur. L'option
+`--ungroup on` restaure une sortie par entree, chaque fichier
+restant un tableau a un enregistrement.
 
 | Option | Valeurs | Bornes | Defaut |
 | ------ | ------- | ------ | ------ |
@@ -66,6 +81,7 @@ dimension_vecteur, nature_vecteur
 | `--retry-time` | entier (secondes) | 1 a 10 | `3` |
 | `--temperature-llm` | decimal | 0 a 1 | `0,2` |
 | `--output-folder` | chemin | - | `output/` |
+| `--ungroup` | `on`, `no` | - | `no` |
 
 Alias LLM valides : `large4` (mistral-large-4), `large`
 (mistral-large-latest), `medium` (mistral-medium-latest), `small`
@@ -73,11 +89,8 @@ Alias LLM valides : `large4` (mistral-large-4), `large`
 (ministral-8b-latest), `3b` (ministral-3b-latest), `zai` (zai-glm-5-3).
 
 `--taille-batch 0` desactive le regroupement en lots : une requete
-d'embedding par texte. La reference complete est dans
-[contracts/cli.md](specs/001-text-vectorization/contracts/cli.md).
-
-La reference complete est dans
-[contracts/cli.md](specs/001-text-vectorization/contracts/cli.md).
+d'embedding par texte. La reference complete du contrat CLI est dans
+[contracts/cli.md](specs/002-sortie-tableau-json/contracts/cli.md).
 
 ## Tests
 
@@ -91,7 +104,7 @@ fictif.
 ## Validation
 
 Le guide de validation pas a pas est dans
-[quickstart.md](specs/001-text-vectorization/quickstart.md).
+[quickstart.md](specs/002-sortie-tableau-json/quickstart.md).
 
 ## Licence
 

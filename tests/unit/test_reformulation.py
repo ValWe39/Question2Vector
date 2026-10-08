@@ -25,6 +25,7 @@ def options() -> VectorizationOptions:
         retry_time=1,
         output_folder=Path("sortie_test"),
         temperature_llm=0.2,
+        ungroup=False,
     )
 
 
