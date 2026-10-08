@@ -53,7 +53,7 @@ mettre a jour (README, contrat CLI de la spec 001)
 design.*
 
 | Principe | Verdict | Verifie |
-|----------|---------|---------|
+| ------- | ------ | ------- |
 | I. Isolation des secrets | PASS | jamais de cle dans la sortie |
 | II. Local-first | PASS | livrable local, aucun service externe |
 | III. Open-source sans trackers | PASS | aucune dependance nouvelle |
