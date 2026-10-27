@@ -24,7 +24,7 @@ Sur Windows (PowerShell), le venv n'est pas toujours active : dans ce cas,
 appelez directement l'executable du venv, sans activation :
 
 ```text
-.venv\Scripts\vector "de quelle couleur est le cheval blanc d'heri IV ?"
+.venv\Scripts\qvector "de quelle couleur est le cheval blanc d'heri IV ?"
 ```
 
 Pour activer le venv, si la strategie d'execution de PowerShell bloque
@@ -37,16 +37,22 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 ```
 
 Apres activation, le prompt affiche un prefixe `(...)` et la commande
-`vector` seule suffit ; `deactivate` pour sortir.
+`qvector` seule suffit ; `deactivate` pour sortir.
 
 ## Usage
 
 ```bash
-vector "Comment fonctionne le depot git ?"      # chaine
-vector Examples/Corsen.txt Examples/Tocqueville2.md   # fichiers
-vector Examples/                               # dossier complet
-vector --reformule on "Ca marche comment ?"     # avec reformulation LLM
+qvector "Comment fonctionne le depot git ?"      # chaine
+qvector Examples/Corsen.txt Examples/Tocqueville2.md   # fichiers
+qvector Examples/                               # dossier complet
+qvector --reformule on "Ca marche comment ?"     # avec reformulation LLM
 ```
+
+Note de migration : la commande s'appelait anciennement `vector`. Le
+renommage en `qvector` est complet et sans alias — mettez a jour vos
+scripts et raccourcis. Apres mise a jour du paquet
+(`pip install -e .`), verifiez qu'aucun ancien script `vector` ne
+reste dans le dossier des scripts du venv ; sinon supprimez-le.
 
 Par defaut, toutes les questions vectorisees du run sont regroupees
 dans un seul fichier `output/sortie.json` (dossier configurable via

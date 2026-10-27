@@ -1,4 +1,4 @@
-"""Ligne de commande `vector` (contracts/cli.md de la spec 002)."""
+"""Ligne de commande `qvector` (contracts/cli.md de la spec 002)."""
 
 from __future__ import annotations
 
@@ -52,7 +52,7 @@ def _motif_court(message: str) -> str:
 
 def construire_parseur() -> argparse.ArgumentParser:
     parseur = argparse.ArgumentParser(
-        prog="vector",
+        prog="qvector",
         description=(
             "Vectorise une chaine, un fichier .txt/.md, un dossier ou "
             "un melange, via les embeddings Mistral."

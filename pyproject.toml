@@ -16,7 +16,7 @@ dev = [
 ]
 
 [project.scripts]
-vector = "question2vector.cli:main"
+qvector = "question2vector.cli:main"
 
 [build-system]
 requires = ["hatchling"]

@@ -34,10 +34,10 @@ validation fournies par l'utilisateur (remplacer les exemples de test) :
 
 **Purpose**: état de référence avant tout changement
 
-- [ ] T001 Vérifier l'état de référence : lancer `pytest` dans tests/,
+- [X] T001 Vérifier l'état de référence : lancer `pytest` dans tests/,
   confirmer la suite verte et noter le nombre de tests (aucun test ne
   devra être modifié par la suite)
-- [ ] T002 Inventorier les occurrences du nom de commande `vector`
+- [X] T002 Inventorier les occurrences du nom de commande `vector`
   dans pyproject.toml, src/question2vector/cli.py,
   src/question2vector/config.py, README.md,
   specs/001-text-vectorization/ et specs/002-sortie-tableau-json/
@@ -49,7 +49,7 @@ validation fournies par l'utilisateur (remplacer les exemples de test) :
 
 **Purpose**: point d'impact unique du renommage côté paquet
 
-- [ ] T003 Renommer l'entry point dans pyproject.toml :
+- [X] T003 Renommer l'entry point dans pyproject.toml :
   `[project.scripts]` `vector = "question2vector.cli:main"` devient
   `qvector = "question2vector.cli:main"` (version inchangée : 0.1.0,
   clarification du 2026-10-27)
@@ -82,18 +82,18 @@ enregistrement par entrée dans l'ordre des arguments, code de sortie 0 ;
 
 ### Implementation for User Story 1
 
-- [ ] T004 [US-1] Mettre à jour le nom de programme dans
+- [X] T004 [US-1] Mettre à jour le nom de programme dans
   src/question2vector/cli.py : `prog="vector"` (ligne 55) devient
   `prog="qvector"`
-- [ ] T005 [P] [US-1] Mettre à jour les docstrings : module de
+- [X] T005 [P] [US-1] Mettre à jour les docstrings : module de
   src/question2vector/cli.py (ligne 1, « Ligne de commande `vector` »)
   et classe dans src/question2vector/config.py (ligne 20, « commande
   `vector` ») → `qvector`
-- [ ] T006 [US-1] Réinstaller le paquet dans le venv (`pip install -e .`)
+- [X] T006 [US-1] Réinstaller le paquet dans le venv (`pip install -e .`)
   puis vérifier que le script `qvector` est présent et que l'ancien
   script `vector` a disparu des scripts du venv (sinon le supprimer
   manuellement, ex. `.venv/Scripts/vector.exe`)
-- [ ] T007 [US-1] Valider la story 1 : exécuter l'independent test
+- [X] T007 [US-1] Valider la story 1 : exécuter l'independent test
   ci-dessus puis `pytest` (suite verte, zéro test modifié)
 
 **Checkpoint**: `qvector` est pleinement fonctionnel et identique.
@@ -114,7 +114,7 @@ le monde ?"` fonctionne.
 
 ### Implementation for User Story 2
 
-- [ ] T008 [US-2] Vérifier la disparition de la collision après T006 :
+- [X] T008 [US-2] Vérifier la disparition de la collision après T006 :
   confirmer l'absence de tout script `vector` de cet outil dans le venv
   et dans le PATH utilisé, et documenter le résultat de la commande
   `vector --help` dans la session
@@ -135,17 +135,17 @@ note de migration du README.
 
 ### Implementation for User Story 3
 
-- [ ] T009 [P] [US-3] Mettre à jour README.md : tous les exemples
+- [X] T009 [P] [US-3] Mettre à jour README.md : tous les exemples
   d'usage (notamment `vector "Comment fonctionne le depot git ?"`,
   `.venv\Scripts\vector` ligne ~27) vers `qvector`, et ajouter une note
   de migration (ancien nom `vector`, remplacement complet sans alias,
   consigne de suppression du script résiduel du venv)
-- [ ] T010 [P] [US-3] Mettre à jour le nom de commande dans
+- [X] T010 [P] [US-3] Mettre à jour le nom de commande dans
   specs/001-text-vectorization/contracts/cli.md (titre, usage
   `vector [ENTRÉE...] [OPTIONS]`, références) et les exemples de
   specs/001-text-vectorization/quickstart.md — sans réécrire les
   scénarios Given/When/Then
-- [ ] T011 [P] [US-3] Mettre à jour le nom de commande dans
+- [X] T011 [P] [US-3] Mettre à jour le nom de commande dans
   specs/002-sortie-tableau-json/contracts/cli.md (ligne d'usage
   `vector [ENTREE...] [OPTIONS]`)
 
@@ -158,15 +158,15 @@ note de migration du README.
 
 **Purpose**: vérifications transverses de fin de feature
 
-- [ ] T012 Scanner les occurrences résiduelles du nom de commande
+- [X] T012 Scanner les occurrences résiduelles du nom de commande
   `vector` dans pyproject.toml, src/, README.md et specs/ (hors note de
   migration du README, documents d'archive Prompts/ et scénarios
   historiques) : attendu 0 résidu
-- [ ] T013 Exécuter la validation complète de
+- [X] T013 Exécuter la validation complète de
   specs/003-renommage-commande-qvector/quickstart.md (6 scénarios),
   en utilisant les 4 questions réelles sur le CIR fournies par
   l'utilisateur comme entrées
-- [ ] T014 Vérifier que la version du paquet reste 0.1.0 dans
+- [X] T014 Vérifier que la version du paquet reste 0.1.0 dans
   pyproject.toml (aucun bump, cf. clarification) et lancer une
   dernière fois `pytest`
 

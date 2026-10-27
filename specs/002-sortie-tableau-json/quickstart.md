@@ -7,13 +7,13 @@
 Guide de validation pas a pas de la feature. Prerequis :
 installation faite (README), `MISTRAL_API_KEY` renseignee dans
 `.env`, venv non active → appeler directement
-`.venv\Scripts\vector` (Windows). Chaque scenario part d'un dossier
+`.venv\Scripts\qvector` (Windows). Chaque scenario part d'un dossier
 de sortie vide via `--output-folder`.
 
 ## Scenario 1 : entree unique → tableau a un element
 
 ```text
-.venv\Scripts\vector "Comment fonctionne le depot git ?" --output-folder output-test
+.venv\Scripts\qvector "Comment fonctionne le depot git ?" --output-folder output-test
 ```
 
 Attendu : code de sortie 0 ; un seul fichier
@@ -24,7 +24,7 @@ tableau d'exactement un enregistrement a 6 champs dont
 ## Scenario 2 : plusieurs entrees → livrable regroupe
 
 ```text
-.venv\Scripts\vector "Question A" "Question B" ^
+.venv\Scripts\qvector "Question A" "Question B" ^
   Examples/Corsen.txt --output-folder output-test
 ```
 
@@ -36,7 +36,7 @@ enregistrement porte son vecteur de la dimension du modele
 ## Scenario 3 : sortie par entree (`--ungroup on`)
 
 ```text
-.venv\Scripts\vector "Question A" "Question B" --ungroup on --output-folder output-test
+.venv\Scripts\qvector "Question A" "Question B" --ungroup on --output-folder output-test
 ```
 
 Attendu : code 0 ; 2 fichiers dans `output-test`, nommes selon le
@@ -48,7 +48,7 @@ tableau a exactement un enregistrement. Sans `--ungroup` (ou avec
 ## Scenario 4 : echec partiel → livrable exhaustif
 
 ```text
-.venv\Scripts\vector "Question A" "Question B" ^
+.venv\Scripts\qvector "Question A" "Question B" ^
   chemin/inexistant.txt --output-folder output-test
 ```
 
@@ -60,7 +60,7 @@ enregistrements : 2 reussites avec vecteur, 1 echec a 3 champs dont
 ## Scenario 5 : aucune entree exploitable
 
 ```text
-.venv\Scripts\vector chemin/inexistant.txt --output-folder output-test
+.venv\Scripts\qvector chemin/inexistant.txt --output-folder output-test
 ```
 
 Attendu : code 1, message d'erreur clair, aucun fichier ecrit.

@@ -17,7 +17,7 @@ class ErreurConfiguration(ValueError):
 
 @dataclass(frozen=True)
 class VectorizationOptions:
-    """Options validees de la commande `vector` (contracts/cli.md)."""
+    """Options validees de la commande `qvector` (contracts/cli.md)."""
 
     embed_model: str
     batch_size: int
