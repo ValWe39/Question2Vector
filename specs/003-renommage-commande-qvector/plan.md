@@ -51,7 +51,7 @@ Python multiplateforme.
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
 | Principe | Statut | Détail |
-|----------|--------|--------|
+| ---------- | -------- | -------- |
 | I. Isolation des secrets | Pass | Aucun secret manipulé ; rien ne change |
 | II. Local-first | Pass | Tout reste local ; aucun service introduit |
 | III. Open-source sans trackers | Pass | Aucune dépendance ajoutée |

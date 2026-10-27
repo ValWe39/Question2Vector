@@ -8,7 +8,7 @@
 ## Scorecard
 
 | Critère | Note | Justification |
-|---------|------|---------------|
+| --------- | ------ | --------------- |
 | Problem validity | strong | Collision réelle, erreurs vécues |
 | Evidence strength | adequate | Code inspecté, motivation sûre |
 | Value vs. inaction | strong | L'inaction ne corrige rien |
