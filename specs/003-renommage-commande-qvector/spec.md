@@ -11,6 +11,14 @@ principale (\"vector\") par \"qvector\" sans changer le reste de l'outil"
 (assessment `renommer-vector-qvector`, decision GO, option A : remplacement
 complet sans alias)
 
+## Clarifications
+
+### Session 2026-10-27
+
+- Q: Faut-il incrémenter la version 0.1.0 du projet pour marquer le
+  renommage de la commande ? → A: Non, rester en 0.1.0 (outil local non
+  publié, aucun bump de version).
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Invoquer l'outil sous son nouveau nom (Priority: P1)
@@ -163,3 +171,5 @@ avec `qvector`.
   conservent leur nom (hors périmètre, cf. decision de l'assessment).
 - L'outil reste mono-utilisateur et non publié : aucune note de
   migration externe n'est requise au-delà du README.
+- La version du projet reste 0.1.0 : le renommage n'est pas marqué par
+  un incrément de version (clarification du 2026-10-27).
