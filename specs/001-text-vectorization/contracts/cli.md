@@ -1,16 +1,16 @@
-# Contrat d'interface CLI : commande `vector`
+# Contrat d'interface CLI : commande `qvector`
 
 **Date**: 2026-10-07 | **Spec**: [spec.md](../spec.md) |
 **Data model**: [data-model.md](../data-model.md)
 
-L'outil expose une seule interface : la commande console `vector`
+L'outil expose une seule interface : la commande console `qvector`
 (entry point déclaré dans `pyproject.toml`, également invocable via
 `python -m question2vector`).
 
 ## Usage
 
 ```text
-vector [ENTRÉE...] [OPTIONS]
+qvector [ENTRÉE...] [OPTIONS]
 ```
 
 `ENTRÉE` : un ou plusieurs arguments (1 minimum). Chaque argument est

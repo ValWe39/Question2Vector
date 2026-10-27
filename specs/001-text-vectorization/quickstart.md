@@ -27,7 +27,7 @@ pip install -e .
 ### Scénario 1 - Chaîne unique (scénario minimal)
 
 ```bash
-vector "Comment fonctionne le dépôt git ?"
+qvector "Comment fonctionne le dépôt git ?"
 ```
 
 Attendu : code de sortie `0` ; un fichier JSON créé dans `output/`,
@@ -39,7 +39,7 @@ floats ; `reformulation` vide (option désactivée).
 ### Scénario 2 - Fichiers .txt et .md
 
 ```bash
-vector Examples/Corsen.txt Examples/Tocqueville2.md
+qvector Examples/Corsen.txt Examples/Tocqueville2.md
 ```
 
 Attendu : deux JSON dans `output/`, chacun avec le contenu intégral du
@@ -49,7 +49,7 @@ texte brut (aucune transformation).
 ### Scénario 3 - Dossier en multi-input avec batching
 
 ```bash
-vector Examples/
+qvector Examples/
 ```
 
 Attendu : 6 JSON (3 `.txt`, 3 `.md`) dans `output/`, un par fichier
@@ -59,7 +59,7 @@ par défaut. Conforme à SC-001.
 ### Scénario 4 - Reformulation activée
 
 ```bash
-vector --reformule on "Ça marche comment ?"
+qvector --reformule on "Ça marche comment ?"
 ```
 
 Attendu : le JSON contient la reformulation renvoyée par le LLM dans
@@ -70,21 +70,21 @@ Variante ambiguë : une question volontairement ambiguë (ex. « Comment
 l'importer ? » sans contexte) doit produire un échec de l'élément sans
 fichier de sortie, signalé dans le résumé, code de sortie `2`.
 
-Variante document long : `vector --reformule on Examples/CourCptes1.txt`
+Variante document long : `qvector --reformule on Examples/CourCptes1.txt`
 ne déclenche aucune reformulation (entrée > 500 caractères) ; le vecteur
 porte sur le texte original, `reformulation` vide.
 
 ### Scénario 5 - Options de configuration
 
 ```bash
-vector --choix-techno-embed 256 --taille-batch 0 \
+qvector --choix-techno-embed 256 --taille-batch 0 \
        --output-folder resultats/ Examples/Corsen.txt
 ```
 
 Attendu : JSON dans `resultats/` avec `dimension_vecteur: 256` et un
 vecteur de 256 floats ; embedding envoyé en requête simple sans batch.
 
-Variante bornes : `vector --taille-batch 150 Examples/Corsen.txt` doit
+Variante bornes : `qvector --taille-batch 150 Examples/Corsen.txt` doit
 échouer avant tout appel API avec un message clair (code de sortie `1`).
 
 ### Scénario 6 - Conflit de nommage
@@ -96,7 +96,7 @@ Relancer le scénario 1. Attendu : le nouveau fichier est nommé
 ### Scénario 7 - Sécurité
 
 ```bash
-MISTRAL_API_KEY= vector "test"
+MISTRAL_API_KEY= qvector "test"
 ```
 
 Attendu : échec immédiat avant tout appel réseau, message clair sur la

@@ -12,7 +12,7 @@ les codes de sortie restent regis par le contrat 001.
 ## Usage
 
 ```text
-vector [ENTREE...] [OPTIONS]
+qvector [ENTREE...] [OPTIONS]
 ```
 
 Inchange : resolution des entrees (chaine, fichier `.txt`/`.md`,
